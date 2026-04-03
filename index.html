@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wuchang: Fallen Feathers — Journey Scroll</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5ecd7;
+    --parchment2: #ede0c4;
+    --gold: #c9923a;
+    --gold-light: #e8b86d;
+    --red-ink: #8b1a1a;
+    --red-bright: #c0392b;
+    --muted: #6b5c3e;
+    --done-bg: #2a3d1e;
+    --done-text: #7ab648;
+    --shrine-gold: #d4a017;
+  }
+
+  body {
+    background: #2a1f0e;
+    font-family: 'Crimson Text', serif;
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .app {
+    max-width: 780px;
+    margin: 0 auto;
+    background: var(--parchment);
+    border-radius: 12px;
+    border: 1px solid #c9923a60;
+    padding-bottom: 2rem;
+  }
+
+  .header {
+    text-align: center;
+    padding: 2rem 1rem 1.5rem;
+    position: relative;
+  }
+
+  .header::before {
+    content: '';
+    display: block;
+    width: 80%;
+    margin: 0 auto 1.2rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .header::after {
+    content: '';
+    display: block;
+    width: 80%;
+    margin: 1.2rem auto 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .game-title {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .main-title {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  .progress-bar-wrap {
+    padding: 1rem 1.5rem 0;
+  }
+
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .progress-count {
+    font-size: 14px;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .progress-track {
+    height: 6px;
+    background: var(--parchment2);
+    border-radius: 3px;
+    overflow: hidden;
+    border: 0.5px solid #c9b89040;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--red-ink), var(--gold));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  .parts-container {
+    padding: 1rem 1rem 0;
+  }
+
+  .part-card {
+    background: var(--parchment);
+    border: 0.5px solid #c9923a50;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .part-card.all-done {
+    border-color: var(--done-text) !important;
+    opacity: 0.85;
+  }
+
+  .part-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    user-select: none;
+    background: var(--parchment2);
+    border-bottom: 0.5px solid transparent;
+    transition: background 0.2s;
+  }
+
+  .part-header:hover { background: #e8d9b8; }
+  .part-header.open { border-bottom-color: #c9923a30; }
+
+  .part-num {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    min-width: 52px;
+  }
+
+  .part-name {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    flex: 1;
+    line-height: 1.3;
+  }
+
+  .part-badge {
+    font-size: 11px;
+    font-family: 'Cinzel', serif;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .part-badge.done-badge {
+    color: var(--done-text);
+    font-weight: 600;
+  }
+
+  .chevron {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 2;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .chevron.open { transform: rotate(180deg); }
+
+  .part-body { display: none; padding: 8px 14px 12px; }
+  .part-body.open { display: block; }
+
+  .task-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 7px 4px;
+    border-bottom: 0.5px solid #c9923a20;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.15s;
+  }
+
+  .task-row:last-child { border-bottom: none; }
+  .task-row:hover { background: #e8d9b815; }
+
+  .task-check {
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid var(--gold);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+    background: transparent;
+  }
+
+  .task-row.checked .task-check {
+    background: var(--done-bg);
+    border-color: var(--done-text);
+  }
+
+  .checkmark {
+    width: 9px;
+    height: 9px;
+    fill: none;
+    stroke: var(--done-text);
+    stroke-width: 2.5;
+    display: none;
+  }
+
+  .task-row.checked .checkmark { display: block; }
+
+  .task-label {
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.55;
+    flex: 1;
+    word-break: break-word;
+  }
+
+  .task-row.checked .task-label {
+    color: var(--muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--muted);
+  }
+
+  .task-tag {
+    font-size: 10px;
+    font-family: 'Cinzel', serif;
+    padding: 2px 7px;
+    border-radius: 10px;
+    white-space: nowrap;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .tag-boss    { background: #4a0a0a; color: #e8a0a0; border: 0.5px solid #8b1a1a; }
+  .tag-optional{ background: #2a2200; color: #c9a84c; border: 0.5px solid #6b5000; }
+  .tag-shrine  { background: #1a2a00; color: #7ab648; border: 0.5px solid #3a5000; }
+  .tag-key     { background: #0a1a2a; color: #7ab8e8; border: 0.5px solid #1a4060; }
+
+  .reset-btn {
+    display: block;
+    margin: 1.5rem auto 0;
+    background: transparent;
+    border: 0.5px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    padding: 6px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .reset-btn:hover { background: var(--gold); color: var(--ink); }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 1rem 0.5rem;
+    justify-content: center;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-family: 'Cinzel', serif;
+    color: var(--muted);
+  }
+
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="game-title">Wuchang: Fallen Feathers</div>
+    <div class="main-title">Journey Scroll</div>
+    <div class="subtitle">Area Progression Checklist</div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-labels">
+      <span>Progress Through Shu</span>
+      <span class="progress-count" id="prog-count">0 / 0</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div style="padding: 0.75rem 1rem 0.5rem;">
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot" style="background:#4a0a0a;border:0.5px solid #8b1a1a;"></span>Boss</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#2a2200;border:0.5px solid #6b5000;"></span>Optional</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#1a2a00;border:0.5px solid #3a5000;"></span>Shrine</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#0a1a2a;border:0.5px solid #1a4060;"></span>Key Item</span>
+    </div>
+  </div>
+
+  <div class="parts-container" id="parts-container"></div>
+  <button class="reset-btn" onclick="resetAll()">⟲ Reset All Progress</button>
+</div>
+
+<script>
+const PARTS = [
+  { id:"p1", num:"Part I", name:"Worship's Rise — Critical Path", tasks:[
+    {id:"t1",label:"Start in the cave, follow the only path forward to Revenant Temple. Claim the Shrine outside the front door on the lower level.",tag:"shrine"},
+    {id:"t2",label:"In the courtyard, go through the gateway to the right. Follow the path forward until you reach the Buddha Cliffs Shrine.",tag:"shrine"},
+    {id:"t3",label:"Continue past Buddha Cliffs to reach Lightzen Temple and claim the shrine there.",tag:"shrine"},
+    {id:"t4",label:"Boss fight at Lightzen Temple: defeat Master Raider — Man-Eating Dhutanga. Pick up the Lightzen key afterward.",tag:"boss"},
+    {id:"t5",label:"Use the Lightzen key to progress forward into a village. Navigate through — it's fairly straightforward — until you reach Shu Sanctum.",tag:"key"},
+    {id:"t6",label:"Claim the Shu Sanctum Shrine on the ground floor.",tag:"shrine"},
+    {id:"t7",label:"Head upstairs and defeat the Feathered Priest — Lu Bingchang. Collect his key.",tag:"boss"},
+    {id:"t8",label:"(Optional) Cross the fallen tree on the 2nd floor of Shu Sanctum, hang immediate left, go up the hill, open the set of doors. Defeat Gluttonous Monstrosity — Lu Hongliu. Good primer for future beast fights.",tag:"optional"},
+    {id:"t9",label:"Use the Feathered Priest's key to rotate the center of Shu Sanctum on the ground floor, revealing a basement. Head down to the Mercury Workshop.",tag:"key"},
+    {id:"t10",label:"Claim the Mercury Workshop Shrine. Use the two lifts as shortcuts before navigating all the way down to claim the Bandit Cave Shrine.",tag:"shrine"},
+    {id:"t11",label:"Just beyond Bandit Cave: defeat Blightweaver — Great Centipede. You'll be spat out into Doomwillow Beach after.",tag:"boss"},
+    {id:"t12",label:"The Doomwillow Beach Shrine is a Mimic — it will attack you on interaction. Defeat it, then unlock the real shrine.",tag:"shrine"},
+    {id:"t13",label:"This is a mostly linear area. Watch for surprise enemy attacks and speak to the Red-Clad Lady when you find her.",tag:null},
+    {id:"t14",label:"Reach and defeat Reborn Treant — Soulwood at the end of Doomwillow Beach. This earns you the Corpse Pits Shrine.",tag:"boss"},
+    {id:"t15",label:"From Corpse Pits, progress forward into Tang Emperor's Palace. There's no new shrine until the end, so proceed carefully.",tag:null},
+    {id:"t16",label:"Inside the palace complex, look for a large gateway on the left side. Open it to reveal a shortcut back to Shu Sanctum.",tag:"key"},
+    {id:"t17",label:"At the back of the palace, defeat the Tang Palace Maid mini-boss. She's not difficult.",tag:"boss"},
+    {id:"t18",label:"Pass through the full palace to reach the Palace Hill Shrine.",tag:"shrine"},
+    {id:"t19",label:"Journey down from the shrine to find a Buddha statue. Then take the upward path from the shrine to place the statue in a contraption — this drains the palace's water level.",tag:"key"},
+    {id:"t20",label:"Head back inside the palace, jump into the shallow water, and face Commander Honglan. After the fight, you'll be teleported back to Revenant Temple.",tag:"boss"},
+  ]},
+  { id:"p2", num:"Part II", name:"Cloudspire — First Steps", tasks:[
+    {id:"t21",label:"From Revenant Temple, take the LEFT gateway from the courtyard (not right like before) to head toward Cloudspire.",tag:null},
+    {id:"t22",label:"Follow the path to reach and claim the Hillswatch Shrine. Don't continue into Cloudspire yet — take a detour first.",tag:"shrine"},
+    {id:"t23",label:"From Hillswatch Shrine, look RIGHT to spot a breakable wooden wagon. Strike it to reveal a tunnel. Follow it to claim the Battlefield Pass Shrine.",tag:"shrine"},
+    {id:"t24",label:"Continue from Battlefield Pass to reach the Refugee Camp. Interact with all NPCs and check their wares — this is a hub you'll return to often.",tag:null},
+  ]},
+  { id:"p3", num:"Part III", name:"Mt. Zhenwu — Ethereal Form", tasks:[
+    {id:"t25",label:"From Refugee Camp, find a slope downward behind one section of the camp. It leads to a flooded area next to Zhenwu Temple. Watch for the giant avian enemy and a demon that manifests.",tag:null},
+    {id:"t26",label:"Take the ladder down to the enemy camp at the base of Zhenwu Temple. Fight through them all before proceeding.",tag:null},
+    {id:"t27",label:"Climb the giant staircase up Zhenwu Temple and claim the Zhenwu Antechamber Shrine.",tag:"shrine"},
+    {id:"t28",label:"There's no direct path forward from here. Head back down one set of stairs, take a left, then work through the row of buildings, rooftops, and courtyards, looping all the way back around to a shortcut door into the antechamber.",tag:null},
+    {id:"t29",label:"In a courtyard with four enemies waving giant battle flags, find a corpse with an item on it — this is the Ethereal Form spell. Pick it up and start using it immediately. It's the best spell in the game.",tag:"key"},
+    {id:"t30",label:"Continue forward from the courtyard to reach and defeat South General — Liu Wenxiu.",tag:"boss"},
+    {id:"t31",label:"After the fight, unlock the shortcut back to Refugee Camp. Then teleport back to Hillswatch Shrine in Cloudspire.",tag:"key"},
+  ]},
+  { id:"p4", num:"Part IV", name:"Cloudspire — Opening the Gates", tasks:[
+    {id:"t32",label:"Back in Cloudspire, continue on the main path forward (now that you have Ethereal Form). Claim the Snowy Passage Shrine.",tag:"shrine"},
+    {id:"t33",label:"Keep going to claim the Cloudspire Outskirts Shrine.",tag:"shrine"},
+    {id:"t34",label:"Find the path or ladder further up the snowy mountain to reach the heavily guarded Rebel Camp Shrine.",tag:"shrine"},
+    {id:"t35",label:"(Optional) From Rebel Camp, head down to fight General of the North — Ai Nengqi. Defeating him opens Snowfall Palace in a cutscene. Alternatively, find and climb the three towers dotted around Cloudspire Outskirts, light the beacons at the top of all three to lower the gates instead.",tag:"optional"},
+    {id:"t36",label:"The Snowfall Palace gates are now open — either by defeating the General or lighting all three beacons.",tag:"key"},
+    {id:"t37",label:"Cross the bridge and defeat Ming General — Liu Cheng'en.",tag:"boss"},
+    {id:"t38",label:"Claim the Snowpeak Pass Shrine at the end of the boss arena.",tag:"shrine"},
+  ]},
+  { id:"p5", num:"Part V", name:"Mt. Zhenwu — Avian Dwelling", tasks:[
+    {id:"t39",label:"Warp back to Refugee Camp. Find the White-Robed Elder NPC standing in front of a tall ladder downward. Speak with him, then head into Avian Marsh.",tag:null},
+    {id:"t40",label:"Avian Marsh has tough enemies but is the best mid-game XP farming spot. Find and claim the Avian Marsh Shrine.",tag:"shrine"},
+    {id:"t41",label:"Keep moving generally upward through the marsh to reach the Avian Dwelling Shrine.",tag:"shrine"},
+    {id:"t42",label:"(Optional) Cross the downed bridge behind the Avian Dwelling Shrine to take on Bo Sorcerer. She's a great fight with lots of NPC quest relevance. Then warp back to Refugee Camp.",tag:"optional"},
+  ]},
+  { id:"p6", num:"Part VI", name:"Mt. Zhenwu — Bai Mansion", tasks:[
+    {id:"t43",label:"From Refugee Camp, use the shortcut you unlocked from the South General boss arena. At the back of that arena, a path leads up to the rooftops of Zhenwu Temple.",tag:null},
+    {id:"t44",label:"Cross the rooftops — enemies here can one-shot you with Despair buildup, so wear Despair-resisting armor. Enter the cave at the end. The shrine inside is a Mimic — defeat it to unlock the Pavilion of Knowledge Shrine.",tag:"shrine"},
+    {id:"t45",label:"Take the stairs up, head back outside to a settlement with blood-colored water. Claim the Altar Gate Shrine just outside a boss door.",tag:"shrine"},
+    {id:"t46",label:"Defeat Fierce Tiger — Zhang Xianzhong. This unlocks the Zhenwu Altar shrine immediately after.",tag:"boss"},
+    {id:"t47",label:"Continue behind the Fierce Tiger boss arena until you reach a bridge shrine. From there, reach a boat landing. At the end of one of the piers is an empty boat — interact with it to travel to Bai Mansion.",tag:null},
+    {id:"t48",label:"Upon landing at Bai Mansion, grab the shrine.",tag:"shrine"},
+    {id:"t49",label:"Defeat Monstrous Toddler — Bai Kru. Then warp back to Cloudspire — Snowpeak Pass.",tag:"boss"},
+  ]},
+  { id:"p7", num:"Part VII", name:"Cloudspire — Snowfall Palace", tasks:[
+    {id:"t50",label:"Progress to the next shrine: Cloudspire City. Then navigate the entire village — streets, building interiors, and rooftops. It's easy to get turned around due to verticality, but there's one ultimate path forward.",tag:"shrine"},
+    {id:"t51",label:"Exit the village on the other side to reach Snowfall Palace Shrine. The giant palace ahead is NOT the way forward — optionally climb to the top to grab a new spell.",tag:"shrine"},
+    {id:"t52",label:"Go back outside and find a hidden path to the RIGHT of the palace steps. It leads to a corridor and then an elevator to the basement. Defeat Mistress of the Night — Huang Yan.",tag:"boss"},
+    {id:"t53",label:"Claim the Treasure Trove Shrine after the fight. A door behind it opens the path forward.",tag:"shrine"},
+    {id:"t54",label:"Head underground from the Shaft Entrance Shrine into a mine-like area.",tag:"shrine"},
+    {id:"t55",label:"Navigate through to the Bride's Boudoir Shrine. This stretch is Sen's Fortress 2.0 — full of spikes, death pendulums, and pressure plates. Watch every step.",tag:"shrine"},
+    {id:"t56",label:"Find a rickety bridge with items in the middle. Walk out, then plummet down when the bridge collapses into the boss arena. Defeat Perfect Bride — Fang Ling. This is the last boss before the point of no return.",tag:"boss"},
+  ]},
+  { id:"p8", num:"Part VIII", name:"Worship's Rise in Ruins", tasks:[
+    {id:"t57",label:"You're now in Annalum — the same opening area, now in flames and overrun by demons. Speak with all NPCs and merchants. Look for the Panda on a short path downhill within Annalum.",tag:null},
+    {id:"t58",label:"Head out the front door of Annalum and activate the Annalum Shrine.",tag:"shrine"},
+    {id:"t59",label:"(Optional) A large boss door down a path to the left leads to the Nightmare Demon. Challenge it if you wish.",tag:"optional"},
+    {id:"t60",label:"Make your way back to Shu Sanctum, now engulfed in flames. Additional shrines around this area are Mimics — be ready to fight them before claiming.",tag:"shrine"},
+    {id:"t61",label:"Explore branching paths from Shu Sanctum — each leads to extra loot or useful items.",tag:null},
+    {id:"t62",label:"Head all the way back to the Revenant Temple where the journey began. Claim the Revenant Temple Shrine for good measure.",tag:"shrine"},
+    {id:"t63",label:"Venture upward through the temple to the top floor and back outside. Near the cave you woke up in, find Xuanyangzi. He'll ask for a chisel — giving it makes him a summonable NPC for the next fight, but LOCKS you into a bad ending. Choose wisely.",tag:"key"},
+    {id:"t64",label:"Grab the Burning Cave Shrine.",tag:"shrine"},
+    {id:"t65",label:"Head all the way to the back of the giant cave and defeat The Reborn — Dragon Emperor. You'll be teleported to the final area automatically.",tag:"boss"},
+  ]},
+  { id:"p9", num:"Part IX", name:"Bo Capital — The Final Stretch", tasks:[
+    {id:"t66",label:"You're now in Bo Capital — a truly horrific place. Claim the Capital Entrance Shrine immediately.",tag:"shrine"},
+    {id:"t67",label:"Work through the area. Giant skeletons with glowing purple eyes shoot Corruption beams at you. Interact with the large golden pillar directly in front of each one to power it down and open your path forward.",tag:null},
+    {id:"t68",label:"Continue along the path — open shortcuts back to Capital Entrance Shrine. Claim the Depths of the Capital Shrine along the way.",tag:"shrine"},
+    {id:"t69",label:"Find the cave with the Panda merchant. Buy anything you need. Then open the Benediction Gateway and exhaust the Storyteller's dialogue to earn a new spell. Then leap downward.",tag:null},
+    {id:"t70",label:"Below, a huge open area requires collecting two halves of a giant ring. Circle the area, take every open path, interact with all golden pillars, and claim both halves. Use the completed ring to open the giant doorway at the back and cross the stone bridge.",tag:"key"},
+    {id:"t71",label:"Walk forward in the suddenly gorgeous area until you find the Forbidden Lands Shrine. This is the final checkpoint before the end — do any cleanup now.",tag:"shrine"},
+  ]},
+  { id:"p10", num:"Part X", name:"End-Game Cleanup", tasks:[
+    {id:"t72",label:"(Optional) Return to Worship's Rise in Ruins to defeat Vermillion Feathers.",tag:"optional"},
+    {id:"t73",label:"(Optional) Return to Worship's Rise in Ruins to defeat Bo Magus.",tag:"optional"},
+    {id:"t74",label:"(Optional) Return near the Avian Dwelling to defeat Eternal Glory.",tag:"optional"},
+    {id:"t75",label:"(Optional) If you've met all the rigorous requirements, return to Bo Capital to defeat Demon of Obsession.",tag:"optional"},
+    {id:"t76",label:"Tie up any remaining NPC quests across all areas before proceeding to the final boss.",tag:null},
+  ]},
+  { id:"p11", num:"Part XI", name:"The Final Boss", tasks:[
+    {id:"t77",label:"Head back to Forbidden Lands Shrine in Bo Capital and enter the doorway behind it.",tag:null},
+    {id:"t78",label:"Defeat the final boss: Feathery Ambition — Xuanyangzi.",tag:"boss"},
+    {id:"t79",label:"After the fight, interact with the giant glowing gateway at the end of the arena. Journey complete — New Game Plus awaits.",tag:"key"},
+  ]},
+];
+
+const STORAGE_KEY = 'wuchang_checklist_v1';
+function loadState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
+function saveState(s) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch {} }
+
+let state = loadState();
+let openParts = {};
+
+function getTagHtml(tag) {
+  if (!tag) return '';
+  const labels = { boss:'Boss', optional:'Optional', shrine:'Shrine', key:'Key Item' };
+  return `<span class="task-tag tag-${tag}">${labels[tag]}</span>`;
+}
+
+function getAllTaskIds() { return PARTS.flatMap(p => p.tasks.map(t => t.id)); }
+
+function updateProgress() {
+  const all = getAllTaskIds();
+  const done = all.filter(id => state[id]).length;
+  document.getElementById('prog-count').textContent = `${done} / ${all.length}`;
+  document.getElementById('prog-fill').style.width = `${all.length ? Math.round(done / all.length * 100) : 0}%`;
+  PARTS.forEach(part => {
+    const card = document.getElementById('card-' + part.id);
+    if (!card) return;
+    const partDone = part.tasks.filter(t => state[t.id]).length;
+    const badge = card.querySelector('.part-badge');
+    if (partDone === part.tasks.length) {
+      card.classList.add('all-done');
+      badge.textContent = '✓ Complete';
+      badge.className = 'part-badge done-badge';
+    } else {
+      card.classList.remove('all-done');
+      badge.textContent = `${partDone}/${part.tasks.length}`;
+      badge.className = 'part-badge';
+    }
+  });
+}
+
+function toggleTask(taskId, el) {
+  state[taskId] = !state[taskId];
+  saveState(state);
+  el.classList.toggle('checked', state[taskId]);
+  updateProgress();
+}
+
+function togglePart(partId) {
+  openParts[partId] = !openParts[partId];
+  document.getElementById('body-' + partId).className = openParts[partId] ? 'part-body open' : 'part-body';
+  document.getElementById('header-' + partId).className = openParts[partId] ? 'part-header open' : 'part-header';
+  document.getElementById('chev-' + partId).className = openParts[partId] ? 'chevron open' : 'chevron';
+}
+
+function renderAll() {
+  const container = document.getElementById('parts-container');
+  container.innerHTML = '';
+  PARTS.forEach((part, i) => {
+    if (i === 0) openParts[part.id] = true;
+    const card = document.createElement('div');
+    card.className = 'part-card';
+    card.id = 'card-' + part.id;
+
+    const partDone = part.tasks.filter(t => state[t.id]).length;
+    const isComplete = partDone === part.tasks.length;
+    if (isComplete) card.classList.add('all-done');
+
+    const header = document.createElement('div');
+    header.className = openParts[part.id] ? 'part-header open' : 'part-header';
+    header.id = 'header-' + part.id;
+    header.onclick = () => togglePart(part.id);
+    header.innerHTML = `
+      <span class="part-num">${part.num}</span>
+      <span class="part-name">${part.name}</span>
+      <span class="part-badge ${isComplete ? 'done-badge' : ''}">${isComplete ? '✓ Complete' : `${partDone}/${part.tasks.length}`}</span>
+      <svg id="chev-${part.id}" class="chevron ${openParts[part.id] ? 'open' : ''}" viewBox="0 0 16 16">
+        <polyline points="3,6 8,11 13,6"/>
+      </svg>`;
+
+    const body = document.createElement('div');
+    body.className = openParts[part.id] ? 'part-body open' : 'part-body';
+    body.id = 'body-' + part.id;
+
+    part.tasks.forEach(task => {
+      const row = document.createElement('div');
+      row.className = `task-row${state[task.id] ? ' checked' : ''}`;
+      row.innerHTML = `
+        <div class="task-check">
+          <svg class="checkmark" viewBox="0 0 10 10"><polyline points="1.5,5.5 4,8 8.5,2"/></svg>
+        </div>
+        <span class="task-label">${task.label}</span>
+        ${getTagHtml(task.tag)}`;
+      row.onclick = () => toggleTask(task.id, row);
+      body.appendChild(row);
+    });
+
+    card.appendChild(header);
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+  updateProgress();
+}
+
+function resetAll() {
+  if (!confirm('Reset all progress?')) return;
+  state = {};
+  saveState(state);
+  renderAll();
+}
+
+renderAll();
+</script>
+</body>
+</html>
