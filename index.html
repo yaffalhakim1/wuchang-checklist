@@ -1,0 +1,2271 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wuchang: Fallen Feathers — Journey Scroll</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --ink: #1a1208;
+        --parchment: #f5ecd7;
+        --parchment2: #ede0c4;
+        --gold: #c9923a;
+        --muted: #6b5c3e;
+        --done-bg: #2a3d1e;
+        --done-text: #7ab648;
+        --red-ink: #8b1a1a;
+        --warn-bg: #2a1800;
+        --warn-text: #e8a84c;
+        --warn-border: #6b3a00;
+        --info-bg: #001a2a;
+        --info-text: #7ab8e8;
+        --info-border: #004060;
+      }
+      body {
+        background: #2a1f0e;
+        font-family: "Crimson Text", serif;
+        color: var(--ink);
+        min-height: 100vh;
+        padding: 1rem 1rem 4rem;
+      }
+      .app {
+        max-width: 800px;
+        margin: 0 auto;
+        background: var(--parchment);
+        border-radius: 12px;
+        border: 1px solid #c9923a60;
+        padding-bottom: 2rem;
+      }
+      .header {
+        text-align: center;
+        padding: 1.75rem 1rem 1.25rem;
+      }
+      .header::before,
+      .header::after {
+        content: "";
+        display: block;
+        width: 80%;
+        margin: 0 auto;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--gold),
+          transparent
+        );
+      }
+      .header::before {
+        margin-bottom: 1rem;
+      }
+      .header::after {
+        margin-top: 1rem;
+      }
+      .game-title {
+        font-family: "Cinzel", serif;
+        font-size: 10px;
+        letter-spacing: 0.35em;
+        color: var(--gold);
+        text-transform: uppercase;
+        margin-bottom: 3px;
+      }
+      .main-title {
+        font-family: "Cinzel", serif;
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+      .subtitle {
+        font-size: 14px;
+        color: var(--muted);
+        font-style: italic;
+        margin-top: 3px;
+      }
+      .tab-bar {
+        display: flex;
+        padding: 0 1rem;
+        border-bottom: 1px solid #c9923a40;
+        margin-top: 0.5rem;
+      }
+      .tab-btn {
+        font-family: "Cinzel", serif;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        padding: 8px 16px;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        color: var(--muted);
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+        white-space: nowrap;
+      }
+      .tab-btn.active {
+        color: var(--gold);
+        border-bottom-color: var(--gold);
+      }
+      .tab-btn:hover:not(.active) {
+        color: var(--ink);
+      }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+      .progress-wrap {
+        padding: 1rem 1.25rem 0.5rem;
+      }
+      .progress-labels {
+        display: flex;
+        justify-content: space-between;
+        font-family: "Cinzel", serif;
+        font-size: 11px;
+        color: var(--muted);
+        margin-bottom: 5px;
+      }
+      .progress-count {
+        color: var(--gold);
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .progress-track {
+        height: 5px;
+        background: var(--parchment2);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--red-ink), var(--gold));
+        border-radius: 3px;
+        transition: width 0.4s ease;
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 0.5rem 1.25rem 0;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 10px;
+        font-family: "Cinzel", serif;
+        color: var(--muted);
+      }
+      .legend-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 2px;
+      }
+      .parts-container {
+        padding: 0.75rem 1rem 0;
+      }
+      .part-card {
+        background: var(--parchment);
+        border: 0.5px solid #c9923a50;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        overflow: hidden;
+      }
+      .part-card.all-done {
+        border-color: var(--done-text);
+        opacity: 0.82;
+      }
+      .part-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        cursor: pointer;
+        user-select: none;
+        background: var(--parchment2);
+        border-bottom: 0.5px solid transparent;
+        transition: background 0.15s;
+      }
+      .part-header:hover {
+        background: #e8d9b8;
+      }
+      .part-header.open {
+        border-bottom-color: #c9923a30;
+      }
+      .part-num {
+        font-family: "Cinzel", serif;
+        font-size: 9px;
+        font-weight: 600;
+        color: var(--gold);
+        letter-spacing: 0.1em;
+        min-width: 50px;
+      }
+      .part-name {
+        font-family: "Cinzel", serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink);
+        flex: 1;
+        line-height: 1.3;
+      }
+      .part-badge {
+        font-size: 11px;
+        font-family: "Cinzel", serif;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .part-badge.done-badge {
+        color: var(--done-text);
+        font-weight: 600;
+      }
+      .chevron {
+        width: 13px;
+        height: 13px;
+        fill: none;
+        stroke: var(--muted);
+        stroke-width: 2;
+        transition: transform 0.2s;
+        flex-shrink: 0;
+      }
+      .chevron.open {
+        transform: rotate(180deg);
+      }
+      .part-body {
+        display: none;
+        padding: 6px 12px 10px;
+      }
+      .part-body.open {
+        display: block;
+      }
+      .task-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        padding: 6px 4px;
+        border-bottom: 0.5px solid #c9923a20;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background 0.12s;
+      }
+      .task-row:last-child {
+        border-bottom: none;
+      }
+      .task-row:hover {
+        background: #e8d9b815;
+      }
+      .task-check {
+        width: 15px;
+        height: 15px;
+        border: 1.5px solid var(--gold);
+        border-radius: 3px;
+        flex-shrink: 0;
+        margin-top: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          background 0.12s,
+          border-color 0.12s;
+      }
+      .task-row.checked .task-check {
+        background: var(--done-bg);
+        border-color: var(--done-text);
+      }
+      .checkmark {
+        width: 8px;
+        height: 8px;
+        fill: none;
+        stroke: var(--done-text);
+        stroke-width: 2.5;
+        display: none;
+      }
+      .task-row.checked .checkmark {
+        display: block;
+      }
+      .task-label {
+        font-size: 14px;
+        color: var(--ink);
+        line-height: 1.5;
+        flex: 1;
+        word-break: break-word;
+      }
+      .task-row.checked .task-label {
+        color: var(--muted);
+        text-decoration: line-through;
+        text-decoration-color: var(--muted);
+      }
+      .task-tag {
+        font-size: 9px;
+        font-family: "Cinzel", serif;
+        padding: 2px 6px;
+        border-radius: 10px;
+        white-space: nowrap;
+        margin-top: 3px;
+        flex-shrink: 0;
+      }
+      .tag-boss {
+        background: #4a0a0a;
+        color: #e8a0a0;
+        border: 0.5px solid #8b1a1a;
+      }
+      .tag-optional {
+        background: #2a2200;
+        color: #c9a84c;
+        border: 0.5px solid #6b5000;
+      }
+      .tag-shrine {
+        background: #1a2a00;
+        color: #7ab648;
+        border: 0.5px solid #3a5000;
+      }
+      .tag-key {
+        background: #0a1a2a;
+        color: #7ab8e8;
+        border: 0.5px solid #1a4060;
+      }
+      .tag-npc {
+        background: #2a0a2a;
+        color: #c8a0e8;
+        border: 0.5px solid #6a3a6a;
+      }
+      .ach-section-label {
+        font-family: "Cinzel", serif;
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        color: var(--gold);
+        text-transform: uppercase;
+        padding: 1rem 1.25rem 0.4rem;
+        border-bottom: 0.5px solid #c9923a30;
+      }
+      .ach-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 1.25rem;
+        border-bottom: 0.5px solid #c9923a20;
+        cursor: pointer;
+        transition: background 0.12s;
+      }
+      .ach-item:hover {
+        background: #ede0c450;
+      }
+      .ach-item:last-child {
+        border-bottom: none;
+      }
+      .ach-check {
+        width: 17px;
+        height: 17px;
+        border: 1.5px solid var(--gold);
+        border-radius: 3px;
+        flex-shrink: 0;
+        margin-top: 1px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          background 0.12s,
+          border-color 0.12s;
+      }
+      .ach-item.checked .ach-check {
+        background: var(--done-bg);
+        border-color: var(--done-text);
+      }
+      .ach-checkmark {
+        width: 9px;
+        height: 9px;
+        fill: none;
+        stroke: var(--done-text);
+        stroke-width: 2.5;
+        display: none;
+      }
+      .ach-item.checked .ach-checkmark {
+        display: block;
+      }
+      .ach-content {
+        flex: 1;
+      }
+      .ach-name {
+        font-family: "Cinzel", serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink);
+        line-height: 1.3;
+      }
+      .ach-item.checked .ach-name {
+        color: var(--muted);
+        text-decoration: line-through;
+      }
+      .ach-desc {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.45;
+        margin-top: 2px;
+      }
+      .ach-req {
+        font-size: 12px;
+        margin-top: 5px;
+        padding: 5px 8px;
+        border-left: 2px solid var(--warn-border);
+        background: var(--warn-bg);
+        color: var(--warn-text);
+        line-height: 1.4;
+      }
+      .ach-req.info {
+        border-left-color: var(--info-border);
+        background: var(--info-bg);
+        color: var(--info-text);
+      }
+      .ach-tier {
+        font-size: 9px;
+        font-family: "Cinzel", serif;
+        padding: 2px 7px;
+        border-radius: 10px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .tier-gold {
+        background: #2a1800;
+        color: #e8b86d;
+        border: 0.5px solid #6b4000;
+      }
+      .tier-silver {
+        background: #1a1a2a;
+        color: #a0b8e8;
+        border: 0.5px solid #3a4060;
+      }
+      .tier-bronze {
+        background: #1a1000;
+        color: #c8844c;
+        border: 0.5px solid #5a3000;
+      }
+      .tier-platinum {
+        background: #2a0a2a;
+        color: #c8a0e8;
+        border: 0.5px solid #6a3a6a;
+      }
+      .ending-card {
+        margin: 0.75rem 1rem 0;
+        border: 0.5px solid #c9923a50;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .ending-card.highlight {
+        border-color: var(--gold);
+      }
+      .ending-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        background: var(--parchment2);
+        cursor: pointer;
+        user-select: none;
+      }
+      .ending-name {
+        font-family: "Cinzel", serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink);
+        flex: 1;
+      }
+      .ending-badge {
+        font-size: 9px;
+        font-family: "Cinzel", serif;
+        padding: 2px 8px;
+        border-radius: 10px;
+        white-space: nowrap;
+      }
+      .badge-bad {
+        background: #4a0a0a;
+        color: #e8a0a0;
+        border: 0.5px solid #8b1a1a;
+      }
+      .badge-good {
+        background: #1a2a00;
+        color: #7ab648;
+        border: 0.5px solid #3a5000;
+      }
+      .badge-true {
+        background: #0a1a2a;
+        color: #7ab8e8;
+        border: 0.5px solid #1a4060;
+      }
+      .badge-secret {
+        background: #2a2200;
+        color: #c9a84c;
+        border: 0.5px solid #6b5000;
+      }
+      .badge-yours {
+        background: #2a0a2a;
+        color: #e88080;
+        font-style: italic;
+      }
+      .ending-body {
+        display: none;
+        padding: 10px 12px 12px;
+      }
+      .ending-body.open {
+        display: block;
+      }
+      .ending-lore {
+        font-size: 14px;
+        color: var(--ink);
+        line-height: 1.55;
+        margin-bottom: 8px;
+        font-style: italic;
+      }
+      .npc-block {
+        margin-top: 6px;
+        padding: 6px 10px;
+        background: var(--info-bg);
+        border-left: 2px solid var(--info-border);
+        color: var(--info-text);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      .ending-steps {
+        list-style: none;
+        margin-top: 8px;
+      }
+      .ending-steps li {
+        font-size: 13px;
+        color: var(--muted);
+        padding: 4px 0 4px 16px;
+        position: relative;
+        line-height: 1.45;
+        border-bottom: 0.5px solid #c9923a15;
+      }
+      .ending-steps li:last-child {
+        border-bottom: none;
+      }
+      .ending-steps li::before {
+        content: "";
+        position: absolute;
+        left: 4px;
+        top: 11px;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--gold);
+      }
+      .ending-steps li.warn {
+        color: var(--warn-text);
+      }
+      .ending-steps li.warn::before {
+        background: var(--warn-text);
+      }
+      .quest-loc {
+        font-size: 11px;
+        color: var(--gold);
+        font-family: "Cinzel", serif;
+        display: block;
+        margin-bottom: 2px;
+      }
+      .reset-btn {
+        display: block;
+        margin: 1.5rem auto 0;
+        background: transparent;
+        border: 0.5px solid var(--gold);
+        color: var(--gold);
+        font-family: "Cinzel", serif;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        padding: 6px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+      .reset-btn:hover {
+        background: var(--gold);
+        color: var(--ink);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="header">
+        <div class="game-title">Wuchang: Fallen Feathers</div>
+        <div class="main-title">Journey Scroll</div>
+        <div class="subtitle">Walkthrough · Questlines · Achievements · Endings</div>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('walkthrough')">
+          Area Walkthrough
+        </button>
+        <button class="tab-btn" onclick="switchTab('achievements')">
+          Achievements
+        </button>
+        <button class="tab-btn" onclick="switchTab('questlines')">NPC Questlines</button>
+        <button class="tab-btn" onclick="switchTab('endings')">Endings</button>
+      </div>
+
+      <div id="tab-walkthrough" class="tab-panel active">
+        <div class="progress-wrap">
+          <div class="progress-labels">
+            <span>Journey Progress</span
+            ><span class="progress-count" id="walk-count">0 / 0</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="walk-fill" style="width: 0%"></div>
+          </div>
+        </div>
+        <div class="legend">
+          <span class="legend-item"
+            ><span
+              class="legend-dot"
+              style="background: #4a0a0a; border: 0.5px solid #8b1a1a"
+            ></span
+            >Boss</span
+          >
+          <span class="legend-item"
+            ><span
+              class="legend-dot"
+              style="background: #2a2200; border: 0.5px solid #6b5000"
+            ></span
+            >Optional</span
+          >
+          <span class="legend-item"
+            ><span
+              class="legend-dot"
+              style="background: #1a2a00; border: 0.5px solid #3a5000"
+            ></span
+            >Shrine</span
+          >
+          <span class="legend-item"
+            ><span
+              class="legend-dot"
+              style="background: #0a1a2a; border: 0.5px solid #1a4060"
+            ></span
+            >Key Item</span
+          >
+          <span class="legend-item"
+            ><span
+              class="legend-dot"
+              style="background: #2a0a2a; border: 0.5px solid #6a3a6a"
+            ></span
+            >NPC Quest</span
+          >
+        </div>
+        <div class="parts-container" id="parts-container"></div>
+        <button class="reset-btn" onclick="resetWalkthrough()">
+          ⟲ Reset Walkthrough
+        </button>
+      </div>
+
+      <div id="tab-achievements" class="tab-panel">
+        <div class="progress-wrap">
+          <div class="progress-labels">
+            <span>Achievement Progress</span
+            ><span class="progress-count" id="ach-count">0 / 0</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="ach-fill" style="width: 0%"></div>
+          </div>
+        </div>
+        <div id="ach-container"></div>
+        <button class="reset-btn" onclick="resetAchievements()">
+          ⟲ Reset Achievements
+        </button>
+      </div>
+
+      <div id="tab-questlines" class="tab-panel">
+        <div class="progress-wrap">
+          <div class="progress-labels">
+            <span>Total Quest Steps</span
+            ><span class="progress-count" id="quest-count">0 / 0</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="quest-fill" style="width: 0%"></div>
+          </div>
+        </div>
+        <div class="parts-container" id="quest-container"></div>
+        <button class="reset-btn" onclick="resetQuests()">⟲ Reset Quests</button>
+      </div>
+
+      <div id="tab-endings" class="tab-panel">
+        <div id="endings-container"></div>
+      </div>
+    </div>
+
+    <script>
+      const WALK_KEY = "wuchang_walk_v2",
+        ACH_KEY = "wuchang_ach_v2",
+        QUEST_KEY = "wuchang_quests_v1";
+      function loadS(k) {
+        try {
+          return JSON.parse(localStorage.getItem(k)) || {};
+        } catch {
+          return {};
+        }
+      }
+      function saveS(k, s) {
+        try {
+          localStorage.setItem(k, JSON.stringify(s));
+        } catch {}
+      }
+      let walkState = loadS(WALK_KEY),
+        achState = loadS(ACH_KEY),
+        questState = loadS(QUEST_KEY),
+        openParts = {};
+
+      const PARTS = [
+        {
+          id: "p1",
+          num: "Part I",
+          name: "Worship's Rise — Critical Path",
+          tasks: [
+            {
+              id: "t1",
+              label:
+                "Start in the cave, follow the only path forward to Revenant Temple. Claim the Shrine outside the front door on the lower level.",
+              tag: "shrine",
+            },
+            {
+              id: "tn_ql1",
+              label:
+                "⚑ Red-Clad Lady — Initial meeting; speak with her in the temple courtyard.",
+              tag: "npc",
+            },
+            {
+              id: "t2",
+              label:
+                "In the courtyard, go through the gateway to the right. Follow the path until you reach the Buddha Cliffs Shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "t3",
+              label:
+                "Continue past Buddha Cliffs to reach Lightzen Temple and claim the shrine there.",
+              tag: "shrine",
+            },
+            {
+              id: "t4",
+              label:
+                "Boss fight at Lightzen Temple: defeat Master Raider — Man-Eating Dhutanga. Pick up the Lightzen key.",
+              tag: "boss",
+            },
+            {
+              id: "t5",
+              label:
+                "Use the Lightzen key to progress forward into a village. Navigate through until you reach Shu Sanctum.",
+              tag: "key",
+            },
+            {
+              id: "t6",
+              label: "Claim the Shu Sanctum Shrine on the ground floor.",
+              tag: "shrine",
+            },
+            {
+              id: "tn_qe1",
+              label:
+                "⚑ White-Robed Elder — Find him on the 2nd-floor balcony. Receive Plumed Branch.",
+              tag: "npc",
+            },
+            {
+              id: "t7",
+              label:
+                "Head upstairs and defeat the Feathered Priest — Lu Bingchang. Collect his key. After defeating him, talk to NPCs in tents at Revenant Temple (missable Faint Red Feather).",
+              tag: "boss",
+            },
+            {
+              id: "t8",
+              label:
+                "(Optional) Cross the fallen tree on the 2nd floor, hang immediate left, go up the hill, open the doors. Defeat Gluttonous Monstrosity — Lu Hongliu.",
+              tag: "optional",
+            },
+            {
+              id: "t9",
+              label:
+                "Use the Feathered Priest's key to rotate the Shu Sanctum floor, revealing a basement. Head down to the Mercury Workshop.",
+              tag: "key",
+            },
+            {
+              id: "t10",
+              label:
+                "Claim the Mercury Workshop Shrine. Use lifts as shortcuts before navigating down to the Bandit Cave Shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "t11",
+              label:
+                "Just beyond Bandit Cave: defeat Blightweaver — Great Centipede. You'll be spat out into Doomwillow Beach.",
+              tag: "boss",
+            },
+            {
+              id: "tn_ql2",
+              label:
+                "⚑ Red-Clad Lady — Talk to her after the Great Centipede fight.",
+              tag: "npc",
+            },
+            {
+              id: "t12",
+              label:
+                "The Doomwillow Beach Shrine is a Mimic — it attacks on interaction. Defeat it, then unlock the real shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "tn_qe2",
+              label:
+                "⚑ White-Robed Elder — Talk to him near the shrine (take the uphill path slightly to the right).",
+              tag: "npc",
+            },
+            {
+              id: "t13",
+              label:
+                "Mostly linear area. Watch for surprise attacks.",
+              tag: null,
+            },
+            {
+              id: "t14",
+              label:
+                "Reach and defeat Reborn Treant — Soulwood. This earns you the Corpse Pits Shrine.",
+              tag: "boss",
+            },
+            {
+              id: "t15",
+              label:
+                "From Corpse Pits, progress forward into Tang Emperor's Palace. No new shrine until the end — proceed carefully.",
+              tag: null,
+            },
+            {
+              id: "t16",
+              label:
+                "Inside the palace complex, look for a large gateway on the left side to open a shortcut back to Shu Sanctum.",
+              tag: "key",
+            },
+            {
+              id: "t17",
+              label:
+                "At the back of the palace, defeat the Tang Palace Maid mini-boss.",
+              tag: "boss",
+            },
+            {
+              id: "t18",
+              label:
+                "Pass through the full palace to reach the Palace Hill Shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "t19",
+              label:
+                "Journey down to find a Buddha statue. Take the upward path from the shrine to place it in the contraption — drains the palace water.",
+              tag: "key",
+            },
+            {
+              id: "t20",
+              label:
+                "Head back inside, jump into the shallow water, and face Commander Honglan. After the fight you'll be teleported back to Revenant Temple.",
+              tag: "boss",
+            },
+          ],
+        },
+        {
+          id: "p2",
+          num: "Part II",
+          name: "Cloudspire — First Steps",
+          tasks: [
+            {
+              id: "t21",
+              label:
+                "From Revenant Temple, take the LEFT gateway from the courtyard toward Cloudspire.",
+              tag: null,
+            },
+            {
+              id: "t22",
+              label:
+                "Follow the path to reach and claim the Hillswatch Shrine. Don't continue into Cloudspire yet.",
+              tag: "shrine",
+            },
+            {
+              id: "tn_qf1",
+              label:
+                "⚑ Fang Yao — Use 'Examine' gesture near the ladder shortcut to find the Shu Silk Scarf.",
+              tag: "npc",
+            },
+            {
+              id: "t23",
+              label:
+                "From Hillswatch Shrine, look RIGHT to spot a breakable wooden wagon. Strike it to reveal a tunnel. Follow it to the Battlefield Pass Shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "tn_qf5",
+              label:
+                "⚑ Fang Yao & He Youzai — Talk to both near the campfire leading to Refugee Camp.",
+              tag: "npc",
+            },
+            {
+              id: "t24",
+              label:
+                "Continue to the Refugee Camp. Interact with ALL NPCs — this is a hub you'll return to often.",
+              tag: null,
+            },
+            {
+              id: "tn_qe4",
+              label:
+                "⚑ White-Robed Elder — Choose 'AGREE' to help him take out a demon. CRITICAL: Refusing breaks the quest.",
+              tag: "npc",
+            },
+          ],
+        },
+        {
+          id: "p3",
+          num: "Part III",
+          name: "Mt. Zhenwu — Ethereal Form",
+          tasks: [
+            {
+              id: "t25",
+              label:
+                "From Refugee Camp, find a slope downward behind the camp to the flooded area next to Zhenwu Temple. Watch for the giant avian enemy and a demon that manifests.",
+              tag: null,
+            },
+            {
+              id: "t26",
+              label:
+                "Take the ladder down to the enemy camp at the temple base. Fight through them all before proceeding.",
+              tag: null,
+            },
+            {
+              id: "t27",
+              label:
+                "Climb the giant staircase up Zhenwu Temple and claim the Zhenwu Antechamber Shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "t28",
+              label:
+                "Head back down one stair, take a left, then work through buildings, rooftops, and courtyards, looping back around to a shortcut door into the antechamber.",
+              tag: null,
+            },
+            {
+              id: "t29",
+              label:
+                "In a courtyard with four flag-waving enemies, find a corpse — this is the Ethereal Form spell. Equip it immediately. Best spell in the game.",
+              tag: "key",
+            },
+            {
+              id: "t30",
+              label:
+                "Continue forward to reach and defeat South General — Liu Wenxiu.",
+              tag: "boss",
+            },
+            {
+              id: "t31",
+              label:
+                "Unlock the shortcut back to Refugee Camp. Then teleport back to Hillswatch Shrine in Cloudspire.",
+              tag: "key",
+            },
+          ],
+        },
+        {
+          id: "p4",
+          num: "Part IV",
+          name: "Cloudspire — Opening the Gates",
+          tasks: [
+            {
+              id: "t32",
+              label:
+                "Back in Cloudspire, continue on the main path. Claim the Snowy Passage Shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "t33",
+              label: "Keep going to claim the Cloudspire Outskirts Shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "tn_qe3",
+              label:
+                "⚑ White-Robed Elder — Climb the tower near the shrine. Find him on the wooden walkway exterior.",
+              tag: "npc",
+            },
+            {
+              id: "t34",
+              label:
+                "Find the path or ladder further up the snowy mountain to reach the Rebel Camp Shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "t35",
+              label:
+                "(Optional) From Rebel Camp, head down to fight General of the North — Ai Nengqi. OR climb all three towers in Cloudspire Outskirts and light their beacons to lower the gates instead.",
+              tag: "optional",
+            },
+            {
+              id: "t36",
+              label:
+                "Open the Snowfall Palace gates (via boss or three beacons).",
+              tag: "key",
+            },
+            {
+              id: "t37",
+              label: "Cross the bridge and defeat Ming General — Liu Cheng'en.",
+              tag: "boss",
+            },
+            {
+              id: "t38",
+              label:
+                "Claim the Snowpeak Pass Shrine at the end of the boss arena.",
+              tag: "shrine",
+            },
+            {
+              id: "tn_qf2",
+              label:
+                "⚑ Fang Yao — Kill the red-bag enemy banging on the door and give her the Shu Silk Scarf.",
+              tag: "npc",
+            },
+          ],
+        },
+        {
+          id: "p5",
+          num: "Part V",
+          name: "Mt. Zhenwu — Avian Dwelling",
+          tasks: [
+            {
+              id: "t39",
+              label:
+                "Warp to Refugee Camp. Find the White-Robed Elder in front of a tall ladder downward. Speak with him — choose AGREE. Head into Avian Marsh.",
+              tag: null,
+            },
+            {
+              id: "t40",
+              label:
+                "Navigate Avian Marsh (best mid-game XP spot). Find and claim the Avian Marsh Shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "tn_qe5",
+              label:
+                "⚑ White-Robed Elder — Talk to him in the clearing after the room with the Lantern-wielding Monk.",
+              tag: "npc",
+            },
+            {
+              id: "t41",
+              label:
+                "Keep moving generally upward to reach the Avian Dwelling Shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "tn_ql3",
+              label:
+                "⚑ Red-Clad Lady — Choose 'I AGREE' to help her.",
+              tag: "npc",
+            },
+            {
+              id: "t42",
+              label:
+                "(Optional but important) Cross the downed bridge behind Avian Dwelling Shrine to fight Bo Sorcerer. Use Bone Whistle to summon White-Robed Elder — required for his questline and Eternal Glory boss access.",
+              tag: "optional",
+            },
+            {
+              id: "tn_qe6",
+              label:
+                "⚑ White-Robed Elder — Summon him using the Bone Whistle during the Bo Sorcerer fight. CRITICAL for progression.",
+              tag: "npc",
+            },
+            {
+              id: "t43",
+              label:
+                "After Bo Sorcerer, speak to White-Robed Elder in the Tomb area (across the tree shortcut from Avian Dwelling, straight past two scared humans). Talk to him there.",
+              tag: null,
+            },
+            {
+              id: "tn_qe7",
+              label:
+                "⚑ White-Robed Elder — Speak with him at the serenity tomb across the giant tree trunk.",
+              tag: "npc",
+            },
+          ],
+        },
+        {
+          id: "p6",
+          num: "Part VI",
+          name: "Mt. Zhenwu — Bai Mansion",
+          tasks: [
+            {
+              id: "t44",
+              label:
+                "From Refugee Camp, use the shortcut from the South General boss arena. The path leads up to the rooftops of Zhenwu Temple.",
+              tag: null,
+            },
+            {
+              id: "t45",
+              label:
+                "Cross the rooftops — enemies build Despair fast, wear Despair-resisting armor. Enter the cave; defeat the Mimic to unlock the Pavilion of Knowledge Shrine. Talk to Storyteller upstairs, select 'Heed the warning' for a Bamboo Shoot.",
+              tag: "shrine",
+            },
+            {
+              id: "t46",
+              label:
+                "Take the stairs up, head back outside to the blood-water settlement. Claim the Altar Gate Shrine just outside a boss door.",
+              tag: "shrine",
+            },
+            {
+              id: "t47",
+              label:
+                "Defeat Fierce Tiger — Zhang Xianzhong. This unlocks the Zhenwu Altar shrine immediately after.",
+              tag: "boss",
+            },
+            {
+              id: "t48",
+              label:
+                "Continue behind the boss arena until you reach a bridge shrine, then a boat landing. Interact with the empty boat to travel to Bai Mansion.",
+              tag: null,
+            },
+            {
+              id: "t49",
+              label: "Upon landing at Bai Mansion, grab the shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "t50",
+              label:
+                "Defeat Monstrous Toddler — Bai Kru. Then warp back to Cloudspire — Snowpeak Pass.",
+              tag: "boss",
+            },
+          ],
+        },
+        {
+          id: "p7",
+          num: "Part VII",
+          name: "Cloudspire — Snowfall Palace",
+          tasks: [
+            {
+              id: "t51",
+              label:
+                "Progress to the Cloudspire City shrine. Navigate the entire village — streets, building interiors, and rooftops. One ultimate path forward.",
+              tag: "shrine",
+            },
+            {
+              id: "t52",
+              label:
+                "Exit the village to reach Snowfall Palace Shrine. The giant palace ahead is NOT the way forward — optionally climb to grab a new spell.",
+              tag: "shrine",
+            },
+            {
+              id: "t53",
+              label:
+                "Go back outside and find a hidden path to the RIGHT of the palace steps. Leads to a corridor and elevator to the basement. Defeat Mistress of the Night — Huang Yan.",
+              tag: "boss",
+            },
+            {
+              id: "t54",
+              label:
+                "Claim the Treasure Trove Shrine. A door behind it opens the path forward.",
+              tag: "shrine",
+            },
+            {
+              id: "t55",
+              label:
+                "Head underground from the Shaft Entrance Shrine into a mine-like area.",
+              tag: "shrine",
+            },
+            {
+              id: "tn_qf3",
+              label:
+                "⚑ Fang Yao — Speak to her and choose 'Agree to help'.",
+              tag: "npc",
+            },
+            {
+              id: "t56",
+              label:
+                "Navigate to Bride's Boudoir Shrine. Packed with spikes, death pendulums, and pressure plates — watch every step. Talk to Storyteller before the plunge for a Bamboo Shoot.",
+              tag: "shrine",
+            },
+            {
+              id: "t57",
+              label:
+                "Walk out onto the rickety bridge, plummet down when it collapses, and defeat Perfect Bride — Fang Ling. Last boss before the point of no return.",
+              tag: "boss",
+            },
+            {
+              id: "tn_qf4",
+              label:
+                "⚑ Fang Yao — Talk to her after defeating Perfect Bride.",
+              tag: "npc",
+            },
+          ],
+        },
+        {
+          id: "p8",
+          num: "Part VIII",
+          name: "Worship's Rise in Ruins",
+          tasks: [
+            {
+              id: "t58",
+              label:
+                "You're now in Annalum — same opening area, now in flames. Speak with all NPCs. Look for the Panda merchant on a short path downhill. Check fast travel for gray NPC icons.",
+              tag: null,
+            },
+            {
+              id: "tn_qf6",
+              label:
+                "⚑ Fang Yao & He Youzai — Speak to both outside the starting building.",
+              tag: "npc",
+            },
+            {
+              id: "tn_ql4",
+              label:
+                "⚑ Red-Clad Lady — Find her and talk to her again.",
+              tag: "npc",
+            },
+            {
+              id: "t59",
+              label:
+                "Head out the front door of Annalum and activate the Annalum Shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "t60",
+              label:
+                "(Optional) A large boss door to the left leads to the Nightmare Demon.",
+              tag: "optional",
+            },
+            {
+              id: "t61",
+              label:
+                "Make your way back to Shu Sanctum (now in flames). Additional shrines nearby are Mimics — fight them first.",
+              tag: "shrine",
+            },
+            {
+              id: "tn_ql5",
+              label:
+                "⚑ Red-Clad Lady — Follow her path through the ruins toward the palace.",
+              tag: "npc",
+            },
+            {
+              id: "t62",
+              label:
+                "Explore branching paths from Shu Sanctum for extra loot and useful items.",
+              tag: null,
+            },
+            {
+              id: "t63",
+              label:
+                "Head all the way back to Revenant Temple. Claim the Revenant Temple Shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "tn_qf7",
+              label:
+                "⚑ Fang Yao & He Youzai — Exhaust all dialogue to get the two Ring halves. DO NOT USE IN INVENTORY.",
+              tag: "npc",
+            },
+            {
+              id: "t64",
+              label:
+                "CRITICAL CHOICE: Venture upward through the temple and back outside to the cave. Find Xuanyangzi on the path. Give chisel = Jarful of Medicine ending. Remain Silent = other endings stay open.",
+              tag: "key",
+            },
+            {
+              id: "t65",
+              label: "Grab the Burning Cave Shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "t66",
+              label:
+                "Head to the back of the giant cave and defeat The Reborn — Dragon Emperor. You'll be teleported to the final area.",
+              tag: "boss",
+            },
+          ],
+        },
+        {
+          id: "p9",
+          num: "Part IX",
+          name: "Bo Capital — The Final Stretch",
+          tasks: [
+            {
+              id: "t67",
+              label:
+                "You're now in Bo Capital. Claim the Capital Entrance Shrine immediately.",
+              tag: "shrine",
+            },
+            {
+              id: "t68",
+              label:
+                "Work through the area. Interact with the large golden pillar in front of each glowing-eyed skeleton to power it down and open your path forward.",
+              tag: null,
+            },
+            {
+              id: "t69",
+              label:
+                "Continue along the path, open shortcuts back to Capital Entrance. Claim the Depths of the Capital Shrine.",
+              tag: "shrine",
+            },
+            {
+              id: "t70",
+              label:
+                "Find the cave with the Panda merchant. Buy what you need. Open the Benediction Gateway and exhaust the Storyteller's dialogue to earn a new spell. Leap downward.",
+              tag: null,
+            },
+            {
+              id: "t71",
+              label:
+                "In the huge open area below, collect both halves of the giant ring. Circle the area, interact with all golden pillars, claim both pieces. Combine them to open the giant doorway.",
+              tag: "key",
+            },
+            {
+              id: "t72",
+              label:
+                "Walk forward in the suddenly gorgeous area to find the Forbidden Lands Shrine. Do ALL end-game cleanup now before the final boss.",
+              tag: "shrine",
+            },
+          ],
+        },
+        {
+          id: "p10",
+          num: "Part X",
+          name: "End-Game Cleanup",
+          tasks: [
+            {
+              id: "t73",
+              label:
+                "Backtrack to Worship's Rise in Ruins to defeat Vermilion Feathers — Honglan (Palace area).",
+              tag: "optional",
+            },
+            {
+              id: "t74",
+              label:
+                "Defeat Bo Magus in Worship's Rise in Ruins at Palace Entrance. WARNING: If following Successor of the Bo ending path, this ends the game early.",
+              tag: "optional",
+            },
+            {
+              id: "t75",
+              label:
+                "Return to the Tomb near Avian Dwelling to defeat Eternal Glory — Zhao Yun. REQUIRES: Full White-Robed Elder questline completed + having reached Bo Capital first.",
+              tag: "optional",
+            },
+            {
+              id: "tn_qe8",
+              label:
+                "⚑ White-Robed Elder — Reach Bo Capital first, then return to the Tomb to face him as the Zhao Yun boss fight.",
+              tag: "npc",
+            },
+            {
+              id: "tn_ql6",
+              label:
+                "⚑ Red-Clad Lady — Defeat Bo Magus to trigger the 'Successor of the Bo' ending early.",
+              tag: "npc",
+            },
+            {
+              id: "t76",
+              label:
+                "For Demon of Obsession: at the riddle door near Depths of Capital shrine, answer 'The wheel turns anew'. REQUIRES: All 6 Inner Demons defeated, all chisels held, Remain Silent to Xuanyangzi, Fang Yao + He Youzai questlines done.",
+              tag: "optional",
+            },
+            {
+              id: "t77",
+              label:
+                "Tie up any remaining NPC quests. Check fast travel menu for gray NPC icons at shrines — each indicates a pending interaction.",
+              tag: null,
+            },
+          ],
+        },
+        {
+          id: "p11",
+          num: "Part XI",
+          name: "The Final Boss",
+          tasks: [
+            {
+              id: "t78",
+              label:
+                "Head back to Forbidden Lands Shrine in Bo Capital and enter the doorway behind it.",
+              tag: null,
+            },
+            {
+              id: "t79",
+              label: "Defeat the final boss: Feathery Ambition — Xuanyangzi.",
+              tag: "boss",
+            },
+            {
+              id: "t80",
+              label:
+                "At the Gate of Truth, interact to trigger your ending. Your earlier choices determine which ending you get.",
+              tag: "key",
+            },
+            {
+              id: "tn_qf8",
+              label:
+                "⚑ Fang Yao — After defeating boss, CONSUME the Ring of Samsara in inventory for the True Ending.",
+              tag: "npc",
+            },
+          ],
+        },
+      ];
+
+      const ACH_SECTIONS = [
+        {
+          label: "Platinum",
+          items: [
+            {
+              id: "a_plat",
+              tier: "platinum",
+              name: "Fallen Feathers",
+              desc: "Earn all other achievements.",
+              req: null,
+              npc: null,
+              yours: false,
+            },
+          ],
+        },
+        {
+          label: "Gold — Endings (4 trophies)",
+          items: [
+            {
+              id: "a_jar",
+              tier: "gold",
+              name: "Jarful of Medicine",
+              desc: "Achieve the Jarful of Medicine ending.",
+              req: "Give Jade Feather Chisel to Xuanyangzi — OR fail/skip He Youzai & Fang Yao questlines. Most players get this on their first run.",
+              npc: null,
+              yours: true,
+            },
+            {
+              id: "a_bound",
+              tier: "gold",
+              name: "Bound by Fate's Threads",
+              desc: "Achieve the true ending: Bound by Fate's Threads.",
+              req: "Complete Fang Yao + He Youzai + White-Robed Elder questlines. Craft Ring of Samsara – Rebirth. CONSUME the ring from inventory before interacting with the Gate of Truth.",
+              npc: "Requires: Fang Yao, He Youzai, and White-Robed Elder questlines fully completed.",
+              yours: false,
+            },
+            {
+              id: "a_dream",
+              tier: "gold",
+              name: "Dream's Sweet Deceit",
+              desc: "Achieve the good ending: Dream's Sweet Deceit.",
+              req: "Same setup as Bound by Fate but keep Ring of Samsara – Rebirth in inventory (don't consume it) when interacting with the gate. Requires answering the riddle door WRONG: 'The wheel turns anew' to fight Demon of Obsession and forge the ring.",
+              npc: "Requires: Fang Yao, He Youzai questlines + defeating Demon of Obsession in Shrine Dwelling.",
+              yours: false,
+            },
+            {
+              id: "a_suc",
+              tier: "gold",
+              name: "Successor of the Bo",
+              desc: "Achieve the secret ending: Successor of the Bo. Game ends in Region 4.",
+              req: "Complete Red-Clad Lady's full questline. At Avian Dwelling, tell her 'I agree'. In Region 4 Worship's Rise in Ruins, refuse to help the Storyteller. Defeat Bo Magus at Palace Entrance — game ends immediately here.",
+              npc: "Requires: Red-Clad Lady questline fully completed across all regions.",
+              yours: false,
+            },
+          ],
+        },
+        {
+          label: "Silver — Major Bosses (8 trophies)",
+          items: [
+            {
+              id: "a_honglan",
+              tier: "silver",
+              name: "Commander — Honglan",
+              desc: "Defeat Commander Honglan at Tang Emperor's Palace.",
+              req: null,
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_fanglin",
+              tier: "silver",
+              name: "Perfect Bride — Fang Ling",
+              desc: "Defeat Perfect Bride — Fang Ling.",
+              req: null,
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_zhangx",
+              tier: "silver",
+              name: "Fierce Tiger — Zhang Xianzhong",
+              desc: "Defeat Fierce Tiger — Zhang Xianzhong.",
+              req: null,
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_zhuyou",
+              tier: "silver",
+              name: "Dragon Emperor — Zhu Youjian",
+              desc: "Defeat Dragon Emperor — Zhu Youjian (The Reborn).",
+              req: null,
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_xuan",
+              tier: "silver",
+              name: "Feathery Ambition — Xuanyangzi",
+              desc: "Defeat the final boss.",
+              req: null,
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_baikru",
+              tier: "silver",
+              name: "Monstrous Toddler — Bai Kru",
+              desc: "Defeat Monstrous Toddler — Bai Kru at Bai Mansion.",
+              req: null,
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_zhaoyun",
+              tier: "silver",
+              name: "Eternal Glory — Zhao Yun",
+              desc: "Defeat the secret boss Eternal Glory — Zhao Yun at the Tomb near Avian Dwelling.",
+              req: "Complete the full White-Robed Elder questline: (1) Shu Sanctum balcony, (2) Doomwillow Beach, (3) Cloudspire Outskirts building, (4) Wedding Hall, (5) Refugee Camp — choose AGREE, (6) summon him via Bone Whistle during Bo Sorcerer fight, (7) speak to him at Avian Dwelling Tomb. Then reach Bo Capital, backtrack to Tomb to trigger the boss fight.",
+              npc: "NPC: White-Robed Elder — must agree to help at Refugee Camp and summon him during Bo Sorcerer fight with the Bone Whistle.",
+              yours: false,
+            },
+            {
+              id: "a_demon",
+              tier: "silver",
+              name: "Demon of Obsession",
+              desc: "Defeat the secret boss Demon of Obsession at Shrine Dwelling in Bo Capital.",
+              req: "Requirements: (1) Complete Fang Yao questline — receive Ring of Samsara – Effect. (2) Complete He Youzai questline (all 3 Research Scraps) — receive Ring of Samsara – Cause. (3) Remain Silent to Xuanyangzi — do NOT give the chisel. (4) Defeat all 6 Inner Demons across the game. (5) Defeat Eternal Glory — Zhao Yun to get the Cyan Feather Chisel. (6) At the riddle door near Depths of Capital shrine, choose the WRONG answer: 'The wheel turns anew'. This teleports you to Shrine Dwelling where the boss awaits.",
+              npc: "NPC questlines required: Fang Yao, He Youzai (all 3 Research Scraps), White-Robed Elder (for Zhao Yun). This is mutually exclusive with the Sage achievement in the same run.",
+              yours: false,
+            },
+          ],
+        },
+        {
+          label: "Silver — Collectibles (3 trophies)",
+          items: [
+            {
+              id: "a_sage",
+              tier: "silver",
+              name: "Sage",
+              desc: "Answer all three riddle doors correctly.",
+              req: "Answer all 3 Mystery Gates correctly across the game. NOTE: Answering Door 3 correctly means you CANNOT fight Demon of Obsession in that run — these are mutually exclusive. Plan separate runs.",
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_lgcol",
+              tier: "silver",
+              name: "Legendary Collector",
+              desc: "Acquire all weapons.",
+              req: "Collect all weapons. Several come from NPC questlines — complete Boatman, Li Dingo, Nian Suichang quests. Give Shu Army Board (from Eternal Glory — Zhao Yun) to Tao Qing to unlock Malice Sting spear.",
+              npc: "NPC weapons: Boatman questline, Li Dingo questline, and give Shu Army Board from Zhao Yun to Tao Qing's shop.",
+              yours: false,
+            },
+            {
+              id: "a_pend",
+              tier: "silver",
+              name: "Pendant Gatherer",
+              desc: "Find all 31 Jade Pendants.",
+              req: "Collect all 31 Jade Pendants. WARNING: Base versions of pendants lock out permanently after finishing NG. Collect all 31 in your first run.",
+              npc: "Warning: base pendant versions are permanently missable after finishing NG.",
+              yours: false,
+            },
+          ],
+        },
+        {
+          label: "Bronze — Story Bosses (7 trophies)",
+          items: [
+            {
+              id: "a_met_div",
+              tier: "bronze",
+              name: "Well Met, Divines",
+              desc: "Offer Blood at a Shrine for the first time.",
+              req: "Interact with your first shrine — happens automatically early in the game.",
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_disc",
+              tier: "bronze",
+              name: "Disciplinary Discipline",
+              desc: "Acquire any Discipline skill.",
+              req: "Open the Impetus Repository at any shrine and unlock one Discipline skill node.",
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_dhut",
+              tier: "bronze",
+              name: "Master Raider — Man-eating Dhutanga",
+              desc: "Defeat the first boss at Lightzen Temple.",
+              req: null,
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_treant",
+              tier: "bronze",
+              name: "Reborn Treant — Soulwood",
+              desc: "Defeat Reborn Treant — Soulwood at Doomwillow Beach.",
+              req: null,
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_mingg",
+              tier: "bronze",
+              name: "Ming General — Liu Cheng'en",
+              desc: "Defeat Ming General — Liu Cheng'en in Cloudspire.",
+              req: null,
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_night",
+              tier: "bronze",
+              name: "Mistress of the Night — Huang Yan",
+              desc: "Defeat Mistress of the Night — Huang Yan in Snowfall Palace basement.",
+              req: null,
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_southg",
+              tier: "bronze",
+              name: "South General — Liu Wenxiu",
+              desc: "Defeat South General — Liu Wenxiu at Zhenwu Temple.",
+              req: null,
+              npc: null,
+              yours: false,
+            },
+          ],
+        },
+        {
+          label: "Bronze — Optional Bosses (6 trophies)",
+          items: [
+            {
+              id: "a_priest",
+              tier: "bronze",
+              name: "Feathered Priest — Lu Bingzhang",
+              desc: "Defeat the optional Feathered Priest at Shu Sanctum.",
+              req: "After defeating him, return to speak with NPCs in the tents at Revenant Temple — missable Faint Red Feather here.",
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_glut",
+              tier: "bronze",
+              name: "Gluttonous Monstrosity — Lu Hongliu",
+              desc: "Defeat the optional boss near Shu Sanctum's 2nd floor.",
+              req: null,
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_centip",
+              tier: "bronze",
+              name: "Blightweaver — Great Centipede",
+              desc: "Defeat Blightweaver — Great Centipede in Mercury Workshop.",
+              req: null,
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_northg",
+              tier: "bronze",
+              name: "General of the North — Ai Nengqi",
+              desc: "Defeat the optional General of the North in Cloudspire.",
+              req: null,
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_bosoc",
+              tier: "bronze",
+              name: "Bo Sorcerer",
+              desc: "Defeat Bo Sorcerer at Avian Marsh.",
+              req: "Use the Bone Whistle to summon White-Robed Elder during this fight to progress his questline — critical for unlocking Eternal Glory and Demon of Obsession later.",
+              npc: "Summon White-Robed Elder (Bone Whistle) during this fight — required for Eternal Glory — Zhao Yun access.",
+              yours: false,
+            },
+            {
+              id: "a_vermil",
+              tier: "bronze",
+              name: "Vermilion Feathers — Honglan",
+              desc: "Defeat Vermilion Feathers — Honglan in Worship's Rise in Ruins.",
+              req: "Located in the Palace area of Worship's Rise in Ruins.",
+              npc: null,
+              yours: false,
+            },
+          ],
+        },
+        {
+          label: "Bronze — Special Encounters (2 trophies)",
+          items: [
+            {
+              id: "a_bomagus",
+              tier: "bronze",
+              name: "Bo Magus",
+              desc: "Defeat Bo Magus in Worship's Rise in Ruins at Palace Entrance.",
+              req: "Take the path left of the Shu Sanctum shrine and go down the ladder. WARNING: If following the Successor of the Bo ending, defeating Bo Magus ends the game immediately. Plan accordingly.",
+              npc: "Also the gate boss for the Successor of the Bo ending if following Red-Clad Lady's questline.",
+              yours: false,
+            },
+            {
+              id: "a_bamboo",
+              tier: "bronze",
+              name: "Bamboozling Return",
+              desc: "Defeat all Bamboozlings (the Panda bear enemies) across all chapters.",
+              req: "Find and defeat all Bamboozlings. They drop Bamboo Shoots. There are 23 Bamboo Shoots total — 19 from Bamboozlings, 4 missable from the Storyteller NPC.",
+              npc: null,
+              yours: false,
+            },
+          ],
+        },
+        {
+          label: "Bronze — Inner Demons (1 trophy)",
+          items: [
+            {
+              id: "a_quell",
+              tier: "bronze",
+              name: "Quelling Madness",
+              desc: "Defeat all 6 Inner Demons across all chapters.",
+              req: "Find and defeat all 6 Inner Demons. This is a prerequisite for unlocking the Demon of Obsession boss fight in Bo Capital.",
+              npc: null,
+              yours: false,
+            },
+          ],
+        },
+        {
+          label: "Bronze — NPC Quests & Upgrades (7 trophies)",
+          items: [
+            {
+              id: "a_radiant",
+              tier: "bronze",
+              name: "Radiant Faith",
+              desc: "Unlock all Worship Shrines.",
+              req: "Find and activate every shrine across all regions. Many shrines are Mimics — fight them first before activating.",
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_discern",
+              tier: "bronze",
+              name: "Discerning Eye",
+              desc: "Find all Mystery Gates and Benediction Gates.",
+              req: "Locate and unlock all sealed gates across all areas. There are 54 Benedictions total. Base versions lock out after finishing NG.",
+              npc: "Warning: Benediction base versions are permanently missable after finishing NG. Collect all 54 across your first two runs.",
+              yours: false,
+            },
+            {
+              id: "a_icall",
+              tier: "bronze",
+              name: "I Call Thee",
+              desc: "Summon an NPC to aid you in a boss fight.",
+              req: "Obtain a Bone Whistle from Nian Suichang by progressing her questline. Use it during a boss fight to summon an NPC.",
+              npc: "NPC: Nian Suichang — progress her questline to receive the Bone Whistle.",
+              yours: false,
+            },
+            {
+              id: "a_shop",
+              tier: "bronze",
+              name: "Shop of Plenty",
+              desc: "Unlock every item in Wu Gang's shop.",
+              req: "Find and give Wu Gang all 9 Valuables scattered throughout the game. Wu Gang also sells up to 10 of each feather type (one-time purchase per feather type). Spend on feathers for weapon upgrades.",
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_travel",
+              tier: "bronze",
+              name: "Well Traveled",
+              desc: "Unlock every item in Tao Qing's shop.",
+              req: "Give Tao Qing all required valuables and boss drops. Give Shu Army Board (from Eternal Glory — Zhao Yun) to unlock his spear. Give Ice Crystal (from Vermilion Feathers) and other boss drops.",
+              npc: "Key items for shop: Shu Army Board from Zhao Yun, Ice Crystal from Vermilion Feathers, and other valuables.",
+              yours: false,
+            },
+            {
+              id: "a_manna",
+              tier: "bronze",
+              name: "Overflowing Manna / Surging Manna",
+              desc: "Fully upgrade AND fully enhance your Manna Vase.",
+              req: "Collect all Forgotten Remembrances (for upgrade) and all Lost Remains (for enhancement). Use the Impetus Repository at any shrine. Max level only reachable in Chapter 5.",
+              npc: null,
+              yours: false,
+            },
+            {
+              id: "a_wielder",
+              tier: "bronze",
+              name: "Wielder of Power",
+              desc: "Fully upgrade a weapon to max level (Level 10).",
+              req: "Requires: 12 Faint Red Feathers + 12 Brilliant Red Feathers + 12 Radiant Red Feathers + 1 Lustrous Red Feather + the Vermilion Chisel. Max level only reachable after reaching Bo Capital (Chapter 5). Wu Gang sells extra feathers (one-time).",
+              npc: null,
+              yours: false,
+            },
+          ],
+        },
+      ];
+
+      const ENDINGS = [
+        {
+          id: "end_jar",
+          name: "Jarful of Medicine",
+          badge: "Bad ending",
+          badgeClass: "badge-bad",
+          highlight: false,
+          yours: true,
+          lore: "Xuanyangzi betrays you at the Gate of Truth. You wake up in a jar on his table at Revenant Temple, wrapped in white cloth — revealed to be his latest batch of 'medicine'. You are not the first Wuchang he has cycled through.",
+          steps: [
+            {
+              text: "Option A: When Xuanyangzi asks for the Jade Feather Chisel near the Burning Cave shrine, select 'Hand over the Jade Feather Chisel'.",
+              warn: true,
+            },
+            {
+              text: "Option B: Simply fail or skip He Youzai's and Fang Yao's questlines — the game defaults to this ending regardless.",
+              warn: false,
+            },
+            {
+              text: "Defeat Feathery Ambition — Xuanyangzi (final boss).",
+              warn: false,
+            },
+            {
+              text: "At the Gate of Truth, select 'Enter the Stream of Samsara'.",
+              warn: true,
+            },
+          ],
+          npc: null,
+        },
+        {
+          id: "end_suc",
+          name: "Successor of the Bo",
+          badge: "Secret ending",
+          badgeClass: "badge-secret",
+          highlight: false,
+          yours: false,
+          lore: "The game ends early in Region 4 — you never reach Bo Capital. You take the place of Bo Magus, who is not in the best shape. The neutral secret ending.",
+          steps: [
+            {
+              text: "Complete ALL interactions with the Red-Clad Lady across the entire game.",
+              warn: false,
+            },
+            {
+              text: "At Avian Dwelling, speak to her and choose 'I agree' — this is what unlocks the 'disagree' option later.",
+              warn: true,
+            },
+            {
+              text: "In Region 4 Worship's Rise in Ruins, when the Storyteller asks for help, choose 'I disagree'.",
+              warn: true,
+            },
+            {
+              text: "Defeat Bo Magus at Palace Entrance (left of Shu Sanctum, down the ladder). Game ends immediately after.",
+              warn: false,
+            },
+          ],
+          npc: "Required questline: Red-Clad Lady — complete every interaction from Region 1 onward.",
+        },
+        {
+          id: "end_dream",
+          name: "Dream's Sweet Deceit",
+          badge: "Good ending",
+          badgeClass: "badge-good",
+          highlight: false,
+          yours: false,
+          lore: "Wuchang enters the Realm of Dreams through the Gate of Truth with the Ring of Samsara. Whether her sister's resurrection is real or an illusion is left open to interpretation.",
+          steps: [
+            {
+              text: "Complete He Youzai's full questline — give him all 3 Research Scraps. He gives Ring of Samsara – Cause.",
+              warn: false,
+            },
+            {
+              text: "Complete Fang Yao's full questline. She gives Ring of Samsara – Effect.",
+              warn: false,
+            },
+            {
+              text: "Complete White-Robed Elder questline. Defeat Eternal Glory — Zhao Yun at the Tomb.",
+              warn: false,
+            },
+            {
+              text: "Remain Silent to Xuanyangzi — do NOT give him the chisel.",
+              warn: true,
+            },
+            {
+              text: "At the riddle door near Depths of Capital shrine, choose WRONG: 'The wheel turns anew'. Teleports you to Shrine Dwelling.",
+              warn: true,
+            },
+            {
+              text: "Defeat Demon of Obsession at Shrine Dwelling.",
+              warn: false,
+            },
+            {
+              text: "At the altar, select 'Reform causality' to forge Ring of Samsara – Rebirth.",
+              warn: false,
+            },
+            {
+              text: "Do NOT consume the ring. Defeat Feathery Ambition — Xuanyangzi.",
+              warn: true,
+            },
+            {
+              text: "At the Gate of Truth, select 'Enter the Realm of Dreams'.",
+              warn: false,
+            },
+          ],
+          npc: "Required NPC questlines: He Youzai (all 3 Research Scraps), Fang Yao, White-Robed Elder (full questline + Eternal Glory fight).",
+        },
+        {
+          id: "end_bound",
+          name: "Bound by Fate's Threads",
+          badge: "True ending",
+          badgeClass: "badge-true",
+          highlight: true,
+          yours: false,
+          lore: "Wuchang escapes the endless dream cycle. Feathering is cured. Fang Yao becomes her new sister. The narrator explicitly confirms this is the true ending.",
+          steps: [
+            {
+              text: "Follow every step of Dream's Sweet Deceit up to and including defeating the final boss.",
+              warn: false,
+            },
+            {
+              text: "After defeating Feathery Ambition — Xuanyangzi, open your INVENTORY and CONSUME the Ring of Samsara – Rebirth so it no longer exists.",
+              warn: true,
+            },
+            {
+              text: "With the ring consumed, interact with the Gate of Truth. Select 'Enter the Realm of Truth'.",
+              warn: false,
+            },
+          ],
+          npc: "Required NPC questlines: He Youzai (all 3 Research Scraps), Fang Yao, White-Robed Elder. Identical to Dream's Sweet Deceit except you consume the ring before interacting with the gate.",
+        },
+      ];
+
+      function getTagHtml(tag) {
+        if (!tag) return "";
+        const l = {
+          boss: "Boss",
+          optional: "Optional",
+          shrine: "Shrine",
+          key: "Key Item",
+          npc: "NPC Quest",
+        };
+        return `<span class="task-tag tag-${tag}">${l[tag]}</span>`;
+      }
+
+      function updateWalkProgress() {
+        const all = PARTS.flatMap((p) => p.tasks.map((t) => t.id));
+        const done = all.filter((id) => walkState[id]).length;
+        document.getElementById("walk-count").textContent =
+          `${done} / ${all.length}`;
+        document.getElementById("walk-fill").style.width =
+          `${all.length ? Math.round((done / all.length) * 100) : 0}%`;
+        PARTS.forEach((part) => {
+          const card = document.getElementById("card-" + part.id);
+          if (!card) return;
+          const pd = part.tasks.filter((t) => walkState[t.id]).length;
+          const badge = card.querySelector(".part-badge");
+          if (pd === part.tasks.length) {
+            card.classList.add("all-done");
+            badge.textContent = "✓ Complete";
+            badge.className = "part-badge done-badge";
+          } else {
+            card.classList.remove("all-done");
+            badge.textContent = `${pd}/${part.tasks.length}`;
+            badge.className = "part-badge";
+          }
+        });
+      }
+
+      function toggleWalkTask(id, el) {
+        walkState[id] = !walkState[id];
+        saveS(WALK_KEY, walkState);
+        el.classList.toggle("checked", walkState[id]);
+        updateWalkProgress();
+        // Sync NPC tasks to questlines tab
+        if (id.startsWith("tn_")) {
+          const questId = id.slice(3);
+          questState[questId] = walkState[id];
+          saveS(QUEST_KEY, questState);
+          renderQuests();
+        }
+      }
+      function togglePart(id) {
+        openParts[id] = !openParts[id];
+        document.getElementById("body-" + id).className = openParts[id]
+          ? "part-body open"
+          : "part-body";
+        document.getElementById("header-" + id).className = openParts[id]
+          ? "part-header open"
+          : "part-header";
+        document.getElementById("chev-" + id).className = openParts[id]
+          ? "chevron open"
+          : "chevron";
+      }
+
+      function renderWalkthrough() {
+        const container = document.getElementById("parts-container");
+        container.innerHTML = "";
+        PARTS.forEach((part, i) => {
+          if (i === 0) openParts[part.id] = true;
+          const pd = part.tasks.filter((t) => walkState[t.id]).length;
+          const isComplete = pd === part.tasks.length;
+          const card = document.createElement("div");
+          card.className = `part-card${isComplete ? " all-done" : ""}`;
+          card.id = "card-" + part.id;
+          const header = document.createElement("div");
+          header.className = openParts[part.id]
+            ? "part-header open"
+            : "part-header";
+          header.id = "header-" + part.id;
+          header.onclick = () => togglePart(part.id);
+          header.innerHTML = `<span class="part-num">${part.num}</span><span class="part-name">${part.name}</span><span class="part-badge ${isComplete ? "done-badge" : ""}">${isComplete ? "✓ Complete" : `${pd}/${part.tasks.length}`}</span><svg id="chev-${part.id}" class="chevron ${openParts[part.id] ? "open" : ""}" viewBox="0 0 16 16"><polyline points="3,6 8,11 13,6"/></svg>`;
+          const body = document.createElement("div");
+          body.className = openParts[part.id] ? "part-body open" : "part-body";
+          body.id = "body-" + part.id;
+          part.tasks.forEach((task) => {
+            const row = document.createElement("div");
+            row.className = `task-row${walkState[task.id] ? " checked" : ""}`;
+            row.innerHTML = `<div class="task-check"><svg class="checkmark" viewBox="0 0 10 10"><polyline points="1.5,5.5 4,8 8.5,2"/></svg></div><span class="task-label">${task.label}</span>${getTagHtml(task.tag)}`;
+            row.onclick = () => toggleWalkTask(task.id, row);
+            body.appendChild(row);
+          });
+          card.appendChild(header);
+          card.appendChild(body);
+          container.appendChild(card);
+        });
+        updateWalkProgress();
+      }
+      function resetWalkthrough() {
+        if (!confirm("Reset all walkthrough progress?")) return;
+        walkState = {};
+        saveS(WALK_KEY, walkState);
+        renderWalkthrough();
+      }
+
+      function updateAchProgress() {
+        const all = ACH_SECTIONS.flatMap((s) => s.items.map((a) => a.id));
+        const done = all.filter((id) => achState[id]).length;
+        document.getElementById("ach-count").textContent =
+          `${done} / ${all.length}`;
+        document.getElementById("ach-fill").style.width =
+          `${all.length ? Math.round((done / all.length) * 100) : 0}%`;
+      }
+      function toggleAch(id, el) {
+        achState[id] = !achState[id];
+        saveS(ACH_KEY, achState);
+        el.classList.toggle("checked", achState[id]);
+        updateAchProgress();
+      }
+
+      function renderAchievements() {
+        const container = document.getElementById("ach-container");
+        container.innerHTML = "";
+        ACH_SECTIONS.forEach((section) => {
+          const label = document.createElement("div");
+          label.className = "ach-section-label";
+          label.textContent = section.label;
+          container.appendChild(label);
+          section.items.forEach((ach) => {
+            const item = document.createElement("div");
+            item.className = `ach-item${achState[ach.id] ? " checked" : ""}`;
+            item.id = "ach-" + ach.id;
+            const yoursTag = ach.yours
+              ? `<span class="ach-tier" style="background:#1a2a0a;color:#a8d870;border:0.5px solid #3a5020;border-radius:10px;font-style:italic;">Your Run ✓</span>`
+              : "";
+            const reqHtml = ach.req
+              ? `<div class="ach-req">${ach.req}</div>`
+              : "";
+            const npcHtml = ach.npc
+              ? `<div class="ach-req info">${ach.npc}</div>`
+              : "";
+            item.innerHTML = `<div class="ach-check"><svg class="ach-checkmark" viewBox="0 0 10 10"><polyline points="1.5,5.5 4,8 8.5,2"/></svg></div><div class="ach-content"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="ach-name">${ach.name}</span>${yoursTag}</div><div class="ach-desc">${ach.desc}</div>${reqHtml}${npcHtml}</div><span class="ach-tier tier-${ach.tier}">${ach.tier.charAt(0).toUpperCase() + ach.tier.slice(1)}</span>`;
+            item.onclick = () => toggleAch(ach.id, item);
+            container.appendChild(item);
+          });
+        });
+        updateAchProgress();
+      }
+      function resetAchievements() {
+        if (!confirm("Reset all achievement progress?")) return;
+        achState = {};
+        saveS(ACH_KEY, achState);
+        renderAchievements();
+      }
+
+      let openEndings = {};
+      function toggleEnding(id) {
+        openEndings[id] = !openEndings[id];
+        document.getElementById("ebody-" + id).className = openEndings[id]
+          ? "ending-body open"
+          : "ending-body";
+      }
+
+      function renderEndings() {
+        const container = document.getElementById("endings-container");
+        container.innerHTML = "";
+        const intro = document.createElement("div");
+        intro.style.cssText =
+          "padding:1rem 1.25rem 0.5rem;font-size:13px;color:var(--muted);line-height:1.55;";
+        intro.innerHTML =
+          'There are 4 endings. All 4 can be done with careful save backups, or across separate runs. Click each ending to expand its full requirements. <span style="color:var(--gold)">Orange steps are critical warnings.</span>';
+        container.appendChild(intro);
+        ENDINGS.forEach((ending) => {
+          const card = document.createElement("div");
+          card.className = `ending-card${ending.highlight ? " highlight" : ""}`;
+          const stepItems = ending.steps
+            .map((s) => `<li class="${s.warn ? "warn" : ""}">${s.text}</li>`)
+            .join("");
+          const npcBlock = ending.npc
+            ? `<div class="npc-block">${ending.npc}</div>`
+            : "";
+          const yoursTag = ending.yours
+            ? `<span class="ending-badge badge-yours">Your Run ✓</span>`
+            : "";
+          card.innerHTML = `<div class="ending-header" onclick="toggleEnding('${ending.id}')"><span class="ending-name">${ending.name}</span>${yoursTag}<span class="ending-badge ${ending.badgeClass}">${ending.badge}</span><svg class="chevron" style="margin-left:4px;" viewBox="0 0 16 16"><polyline points="3,6 8,11 13,6"/></svg></div><div class="ending-body" id="ebody-${ending.id}"><p class="ending-lore">${ending.lore}</p>${npcBlock}<ul class="ending-steps">${stepItems}</ul></div>`;
+          container.appendChild(card);
+        });
+        const note = document.createElement("div");
+        note.style.cssText =
+          "padding:1rem 1.25rem;font-size:12px;color:var(--muted);font-style:italic;";
+        note.innerHTML =
+          "Note: Sage achievement (all riddles correct) and Demon of Obsession (wrong answer on Door 3) are mutually exclusive in the same run. Plan separate runs or save backups accordingly.";
+        container.appendChild(note);
+      }
+
+      function switchTab(id) {
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-panel")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelector(`[onclick="switchTab('${id}')"]`)
+          .classList.add("active");
+        document.getElementById("tab-" + id).classList.add("active");
+      }
+
+      const QUESTS = [
+        {
+          id: "q_elder",
+          name: "White-Robed Elder (Zhao Yun)",
+          tasks: [
+            { id: "qe1", loc: "Region 1: Shu Sanctum", label: "Find him on the 2nd-floor balcony. Receive Plumed Branch." },
+            { id: "qe2", loc: "Region 1: Doomwillow Beach", label: "Talk to him near the shrine (take the uphill path slightly to the right)." },
+            { id: "qe3", loc: "Region 2: Cloudspire Outskirts", label: "Climb the tower near the shrine. Find him on the wooden walkway exterior." },
+            { id: "qe4", loc: "Region 3: Refugee Camp", label: "Choose 'AGREE' to help him take out a demon. CRITICAL: Refusing breaks the quest." },
+            { id: "qe5", loc: "Region 3: Avian Marsh", label: "Talk to him in the clearing after the room with the Lantern-wielding Monk." },
+            { id: "qe6", loc: "Region 3: Bo Sorcerer Fight", label: "Summon him using the Bone Whistle during the fight. CRITICAL for progression." },
+            { id: "qe7", loc: "Region 3: Tomb", label: "After the fight, speak with him at the serenity tomb across the giant tree trunk." },
+            { id: "qe8", loc: "Region 5: Bo Capital / Backtrack to Tomb", label: "Reach Bo Capital first, then return to the Tomb to face him as the Zhao Yun boss fight." },
+          ],
+        },
+        {
+          id: "q_fang",
+          name: "Fang Yao & He Youzai (Ring of Samsara)",
+          tasks: [
+            { id: "qf1", loc: "Region 2: Hillswatch", label: "Use 'Examine' gesture near the ladder shortcut to find the Shu Silk Scarf." },
+            { id: "qf2", loc: "Region 2: Snowpeak Pass", label: "Kill the red-bag enemy banging on the door and give Fang Yao the scarf." },
+            { id: "qf3", loc: "Region 2: Shaft Entrance", label: "Speak to Fang Yao and choose 'Agree to help'." },
+            { id: "qf4", loc: "Region 2: Wedding Hall", label: "Talk to Fang Yao after defeating Perfect Bride." },
+            { id: "qf5", loc: "Region 3: Battlefield Pass", label: "Talk to both Fang and He near the campfire leading to Refugee Camp." },
+            { id: "qf6", loc: "Region 4: Annalum (Ruins)", label: "Speak to both outside the starting building." },
+            { id: "qf7", loc: "Region 4: Reverent Temple", label: "Exhaust all dialogue to get the two Ring halves. DO NOT USE IN INVENTORY." },
+            { id: "qf8", loc: "Final Boss", label: "Defeat boss, then CONSUME the ring in inventory for the True Ending." },
+          ],
+        },
+        {
+          id: "q_lady",
+          name: "Red-Clad Lady (Bo Magus)",
+          tasks: [
+            { id: "ql1", loc: "Region 1: Reverent Temple", label: "Initial meeting; speak with her in the temple courtyard." },
+            { id: "ql2", loc: "Region 1: Lu Mansion", label: "Talk to her after the Great Centipede fight." },
+            { id: "ql3", loc: "Region 3: Avian Dwelling", label: "Choose 'I AGREE' to help her." },
+            { id: "ql4", loc: "Region 4: Annalum (Ruins)", label: "Find her and talk to her again." },
+            { id: "ql5", loc: "Region 4: Shu Sanctum (Ruins)", label: "Follow her path through the ruins toward the palace." },
+            { id: "ql6", loc: "Region 4: Palace Entrance", label: "Defeat Bo Magus to trigger the 'Successor of the Bo' ending early." },
+          ],
+        },
+      ];
+
+      function updateQuestProgress() {
+        const all = QUESTS.flatMap((q) => q.tasks.map((t) => t.id));
+        const done = all.filter((id) => questState[id]).length;
+        document.getElementById("quest-count").textContent = `${done} / ${all.length}`;
+        document.getElementById("quest-fill").style.width = `${all.length ? Math.round((done / all.length) * 100) : 0}%`;
+      }
+
+      function toggleQuestStep(id, el) {
+        questState[id] = !questState[id];
+        saveS(QUEST_KEY, questState);
+        el.classList.toggle("checked", questState[id]);
+        updateQuestProgress();
+        // Sync to walkthrough tab
+        const walkId = "tn_" + id;
+        walkState[walkId] = questState[id];
+        saveS(WALK_KEY, walkState);
+        renderWalkthrough();
+      }
+
+      function renderQuests() {
+        const container = document.getElementById("quest-container");
+        container.innerHTML = "";
+        QUESTS.forEach((quest) => {
+          const card = document.createElement("div");
+          card.className = "part-card";
+          card.innerHTML = `<div class="part-header" onclick="this.nextElementSibling.classList.toggle('open')"><span class="part-name">${quest.name}</span></div>`;
+          const body = document.createElement("div");
+          body.className = "part-body open";
+          quest.tasks.forEach((task) => {
+            const row = document.createElement("div");
+            row.className = `task-row${questState[task.id] ? " checked" : ""}`;
+            row.innerHTML = `<div class="task-check"><svg class="checkmark" viewBox="0 0 10 10"><polyline points="1.5,5.5 4,8 8.5,2"/></svg></div><div class="task-label"><span class="quest-loc">${task.loc}</span>${task.label}</div>`;
+            row.onclick = () => toggleQuestStep(task.id, row);
+            body.appendChild(row);
+          });
+          card.appendChild(body);
+          container.appendChild(card);
+        });
+        updateQuestProgress();
+      }
+
+      function resetQuests() {
+        if (!confirm("Reset all quest progress?")) return;
+        questState = {};
+        saveS(QUEST_KEY, questState);
+        renderQuests();
+      }
+
+      renderWalkthrough();
+      renderAchievements();
+      renderEndings();
+      renderQuests();
+
+      // Initial sync: align questState with walkState for NPC tasks
+      (function syncInitial() {
+        let changed = false;
+        PARTS.forEach((p) => p.tasks.forEach((t) => {
+          if (t.id.startsWith("tn_")) {
+            const qid = t.id.slice(3);
+            if (walkState[t.id] && !questState[qid]) {
+              questState[qid] = true; changed = true;
+            } else if (!walkState[t.id] && questState[qid]) {
+              walkState[t.id] = true; changed = true;
+            }
+          }
+        }));
+        if (changed) {
+          saveS(WALK_KEY, walkState);
+          saveS(QUEST_KEY, questState);
+          renderWalkthrough();
+          renderQuests();
+        }
+      })();
+
+      if (!achState["a_jar"]) {
+        achState["a_jar"] = true;
+        saveS(ACH_KEY, achState);
+        const el = document.getElementById("ach-a_jar");
+        if (el) el.classList.add("checked");
+        updateAchProgress();
+      }
+    </script>
+  </body>
+</html>
