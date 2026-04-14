@@ -592,6 +592,94 @@
         background: var(--gold);
         color: var(--ink);
       }
+      /* Hide Completed Button */
+      .hide-done-btn {
+        display: inline-block;
+        margin: 0.5rem 1.25rem 0;
+        background: transparent;
+        border: 0.5px solid var(--muted);
+        color: var(--muted);
+        font-family: "Cinzel", serif;
+        font-size: 9px;
+        letter-spacing: 0.15em;
+        padding: 4px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          color 0.2s;
+      }
+      .hide-done-btn.active {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+      /* CSS-based hide: toggled by class on container */
+      .hide-completed .task-row.checked {
+        display: none;
+      }
+      /* Mobile Responsive */
+      @media (max-width: 540px) {
+        body {
+          padding: 0.5rem 0.5rem 3rem;
+        }
+        .app {
+          border-radius: 8px;
+        }
+        .main-title {
+          font-size: 20px;
+        }
+        .subtitle {
+          font-size: 12px;
+        }
+        .tab-bar {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          padding: 0 0.5rem;
+          scrollbar-width: none;
+        }
+        .tab-bar::-webkit-scrollbar {
+          display: none;
+        }
+        .tab-btn {
+          font-size: 10px;
+          padding: 7px 10px;
+        }
+        .progress-wrap {
+          padding: 0.75rem 0.75rem 0.5rem;
+        }
+        .legend {
+          padding: 0.4rem 0.75rem 0;
+          gap: 6px;
+        }
+        .parts-container {
+          padding: 0.5rem 0.5rem 0;
+        }
+        .part-header {
+          padding: 9px 10px;
+          gap: 7px;
+        }
+        .part-name {
+          font-size: 12px;
+        }
+        .task-label {
+          font-size: 13px;
+        }
+        .ach-item {
+          padding: 8px 0.75rem;
+        }
+        .ach-section-label {
+          padding: 0.75rem 0.75rem 0.3rem;
+        }
+        .ending-card {
+          margin: 0.5rem 0.5rem 0;
+        }
+        .ending-header {
+          padding: 9px 10px;
+        }
+        .hide-done-btn {
+          margin: 0.4rem 0.75rem 0;
+        }
+      }
     </style>
   </head>
   <body>
@@ -659,6 +747,7 @@
             >NPC Quest</span
           >
         </div>
+        <button class="hide-done-btn" id="walk-hide-btn" onclick="toggleHideDone('walk')">☽ Hide Completed</button>
         <div class="parts-container" id="parts-container"></div>
         <button class="reset-btn" onclick="resetWalkthrough()">
           ⟲ Reset Walkthrough
@@ -691,6 +780,7 @@
             <div class="progress-fill" id="quest-fill" style="width: 0%"></div>
           </div>
         </div>
+        <button class="hide-done-btn" id="quest-hide-btn" onclick="toggleHideDone('quest')">☽ Hide Completed</button>
         <div class="parts-container" id="quest-container"></div>
         <button class="reset-btn" onclick="resetQuests()">⟲ Reset Quests</button>
       </div>
@@ -2231,6 +2321,24 @@
         questState = {};
         saveS(QUEST_KEY, questState);
         renderQuests();
+      }
+
+      // Hide Completed toggle (uses CSS class approach — no re-render needed)
+      const hideDone = { walk: false, quest: false };
+      function toggleHideDone(tab) {
+        hideDone[tab] = !hideDone[tab];
+        const btn = document.getElementById(tab + "-hide-btn");
+        const containerId = tab === "walk" ? "parts-container" : "quest-container";
+        const container = document.getElementById(containerId);
+        if (hideDone[tab]) {
+          container.classList.add("hide-completed");
+          btn.classList.add("active");
+          btn.textContent = "☀ Show All";
+        } else {
+          container.classList.remove("hide-completed");
+          btn.classList.remove("active");
+          btn.textContent = "☽ Hide Completed";
+        }
       }
 
       renderWalkthrough();
